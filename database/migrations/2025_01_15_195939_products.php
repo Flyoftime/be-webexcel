@@ -15,13 +15,13 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('name');  // Nama produk
-            $table->text('description');  // Deskripsi produk
-            $table->decimal('price', 10, 2);  // Harga produk
-            $table->foreignId('category_id')  // Relasi ke categories
+            $table->string('name');  
+            $table->text('description');  
+            $table->decimal('price', 10, 2);  
+            $table->foreignId('category_id')  
                 ->constrained()
-                ->onDelete('restrict');  // Jika kategori dihapus, produk tidak akan dihapus
-            $table->foreignId('subcategory_id')  // Relasi ke subcategories
+                ->onDelete('restrict');  
+            $table->foreignId('subcategory_id')  
                 ->constrained()
                 ->onDelete('restrict');
             $table->string('excel_file');

@@ -15,10 +15,10 @@ return new class extends Migration
     {
         Schema::create('subcategories', function (Blueprint $table) {
             $table->id();
-            $table->string('name');  // Nama subkategori
-            $table->foreignId('category_id')  // Relasi ke categories
+            $table->string('name'); 
+            $table->foreignId('category_id')  
                 ->constrained()
-                ->onDelete('cascade');  // Jika subkategori dihapus, maka subkategori yang terkait akan dihapus, tetapi category tidak
+                ->onDelete('cascade');
             $table->timestamps();
         });
     }

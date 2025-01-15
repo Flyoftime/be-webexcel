@@ -9,13 +9,13 @@ class Subcategory extends Model
 {
     use HasFactory;
 
-    // Relasi dengan Category
+   
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
 
-    // Relasi dengan Product
+   
     public function products()
     {
         return $this->hasMany(Product::class);

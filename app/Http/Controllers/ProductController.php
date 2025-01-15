@@ -22,11 +22,11 @@ $request->validate([
 'subcategory_id' => 'required|exists:subcategories,id',
 ]);
 
-// Process file upload and import
+
 $file = $request->file('file');
 $path = $file->storeAs('public/products', time() . '.' . $file->getClientOriginalExtension());
 
-// Save data to Product model
+
 Product::create([
 'name' => $request->name,
 'description' => $request->description,

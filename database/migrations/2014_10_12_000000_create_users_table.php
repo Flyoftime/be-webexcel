@@ -16,12 +16,12 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id(); 
             $table->string('name');
-            $table->string('email', 191)->unique(); // Restrict length to 191 for compatibility
+            $table->string('email', 191)->unique(); 
             $table->string('password')->nullable();
             $table->enum('role', ['admin', 'seller', 'user'])->default('user');
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
-            $table->timestamps(); // Adds created_at and updated_at columns
+            $table->timestamps(); 
         });
     }
 

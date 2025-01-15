@@ -18,12 +18,12 @@ $this->excelFilePath = $excelFilePath;
 public function model(array $row)
 {
 return new Product([
-'name' => $row['name'], // Sesuaikan dengan nama kolom di file Excel
+'name' => $row['name'], 
 'description' => $row['description'],
 'price' => $row['price'],
-'category_id' => $row['category_id'], // ID kategori yang sesuai
-'subcategory_id' => $row['subcategory_id'], // ID subkategori yang sesuai
-'excel_file' => $this->excelFilePath, // Menyimpan path file Excel
+'category_id' => $row['category_id'], 
+'subcategory_id' => $row['subcategory_id'], 
+'excel_file' => $this->excelFilePath, 
 ]);
 }
 }

@@ -64,19 +64,19 @@ class AuthController extends Controller
     // Login
     public function login(Request $request)
     {
-        // Validasi input yang diterima
+        
         $validated = $request->validate([
             'email' => 'required|email',
             'password' => 'required|min:6',
         ]);
 
-        // Periksa apakah email dan password sesuai
+        
         $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
 
-            // Jika login berhasil, buat token untuk pengguna
+            
             $token = $user->createToken('authToken')->plainTextToken;
 
             return response()->json([
@@ -87,7 +87,7 @@ class AuthController extends Controller
             ]);
         }
 
-        // Jika login gagal, beri response lebih detail
+        
         return response()->json([
             'message' => 'Invalid credentials. Please check your email or password.',
             'status' => 'error',
@@ -97,7 +97,7 @@ class AuthController extends Controller
         ], 401); 
     }
 
-    // Mendapatkan data pengguna
+   
     public function user(Request $request)
     {
         return response()->json($request->user());

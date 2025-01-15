@@ -23,7 +23,7 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
-    // Relasi dengan Subcategory
+    
     public function subcategory()
     {
         return $this->belongsTo(Subcategory::class);
