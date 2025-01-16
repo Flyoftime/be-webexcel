@@ -31,8 +31,8 @@ class AuthController extends Controller
                 'email' => $validated['email'],
                 'password' => $validated['password'] ? Hash::make($validated['password']) : null,
             ]);
-            
-            
+
+
             if ($request->provider === 'google') {
                 $user->provider = 'google';
                 $user->save();
@@ -49,14 +49,14 @@ class AuthController extends Controller
             // Tangkap error validasi
             return response()->json([
                 'message' => 'Validation failed',
-                'errors' => $e->errors(), 
-            ], 422); 
+                'errors' => $e->errors(),
+            ], 422);
         } catch (\Exception $e) {
-            
+
             return response()->json([
                 'message' => 'Registration failed',
                 'error' => $e->getMessage(),
-            ], 500); 
+            ], 500);
         }
     }
 
