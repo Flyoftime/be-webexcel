@@ -8,22 +8,22 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 class ProductsImport implements ToModel, WithHeadingRow
 {
-protected $excelFilePath;
+    protected $excelFilePath;
 
-public function __construct($excelFilePath = null)
-{
-$this->excelFilePath = $excelFilePath;
-}
+    public function __construct($excelFilePath = null)
+    {
+        $this->excelFilePath = $excelFilePath;
+    }
 
-public function model(array $row)
-{
-return new Product([
-'name' => $row['name'], 
-'description' => $row['description'],
-'price' => $row['price'],
-'category_id' => $row['category_id'], 
-'subcategory_id' => $row['subcategory_id'], 
-'excel_file' => $this->excelFilePath, 
-]);
-}
+    public function model(array $row)
+    {
+        return new Product([
+            'name' => $row['name'],
+            'description' => $row['description'],
+            'price' => $row['price'],
+            'category_id' => $row['category_id'],
+            'subcategory_id' => $row['subcategory_id'],
+            'excel_file' => $this->excelFilePath,
+        ]);
+    }
 }
