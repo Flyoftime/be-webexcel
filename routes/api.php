@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/store/product', [ProductController::class, 'upload']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login-google', [AuthController::class, 'loginGoogle']);
 Route::post('/upload-products', [ProductController::class, 'upload'])->name('upload.products');
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

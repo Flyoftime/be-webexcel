@@ -15,21 +15,21 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         try {
-            // Validasi inputan
+            
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users,email',
                 'password' => $request->has('provider') && $request->provider === 'google'
-                    ? 'nullable'  // Password nullable jika menggunakan Google OAuth
-                    : 'required|string|min:8',  // Password required jika menggunakan email/password
-                'provider' => 'nullable|in:google', // Hanya menerima 'google' untuk Google OAuth
+                    ? 'nullable'  
+                    : 'required|string|min:8',  
+                'provider' => 'nullable|in:google',
             ]);
 
-            // Menyimpan pengguna
+            
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
-                'password' => $validated['password'] ? Hash::make($validated['password']) : null, // Hash jika password ada
+                'password' => $validated['password'] ? Hash::make($validated['password']) : null,
             ]);
             
             
@@ -38,7 +38,7 @@ class AuthController extends Controller
                 $user->save();
             }
 
-            // Login otomatis setelah registrasi
+
             auth()->login($user);
 
             return response()->json([
@@ -65,18 +65,51 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         
-        $validated = $request->validate([
+        $request->validate([
             'email' => 'required|email',
             'password' => 'required|min:6',
         ]);
 
-        
-        $credentials = $request->only('email', 'password');
+        $user = User::where('email', $request->email)->first();
 
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
+        if($user) {
+            if(Hash::check($request->password, $user->password)) {
+                $token = $user->createToken('authToken')->plainTextToken;
 
-            
+                return response()->json([
+                    'message' => 'Login successful',
+                    'status' => 'success',
+                    'user' => $user,
+                    'token' => $token,
+                ]);
+            } else {
+                return response()->json([
+                    'message' => 'Invalid credentials. Please check your email or password.',
+                    'status' => 'error',
+                    'errors' => [
+                        'email' => 'The provided credentials do not match our records.',
+                    ]
+                ], 401); 
+            }
+        } else {
+            return response()->json([
+                'message' => 'Invalid credentials. Please check your email or password.',
+                'status' => 'error',
+                'errors' => [
+                    'email' => 'The provided credentials do not match our records.',
+                ]
+            ], 401); 
+        }
+    }
+    
+    public function user(Request $request)
+    {
+        return response()->json($request->user());
+    }
+    public function loginGoogle(Request $request) {
+        $user = User::where('email', $request->email)->first();
+
+        if($user && $user->provider == 'google'){
             $token = $user->createToken('authToken')->plainTextToken;
 
             return response()->json([
@@ -85,21 +118,14 @@ class AuthController extends Controller
                 'user' => $user,
                 'token' => $token,
             ]);
+        } else {
+            return response()->json([
+                'message' => 'Google account is not linked to your account',
+                'status' => 'error',
+                'errors' => [
+                    'email' => 'The provided google account is not linked to your account',
+                ]
+            ], 403); 
         }
-
-        
-        return response()->json([
-            'message' => 'Invalid credentials. Please check your email or password.',
-            'status' => 'error',
-            'errors' => [
-                'email' => 'The provided credentials do not match our records.',
-            ]
-        ], 401); 
-    }
-
-   
-    public function user(Request $request)
-    {
-        return response()->json($request->user());
     }
 }
