@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::post('/store/product', [ProductController::class, 'store']);
+Route::post('/store/product', [ProductController::class, 'upload']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/upload-products', [ProductController::class, 'upload'])->name('upload.products');
