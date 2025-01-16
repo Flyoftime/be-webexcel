@@ -3,11 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\Category;
-use App\Models\Subcategory;
 use Illuminate\Http\Request;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Imports\ProductsImport;
 
 class ProductController extends Controller
 {
@@ -24,46 +20,29 @@ class ProductController extends Controller
 
 
         $file = $request->file('file');
-        // $path = $file->storeAs('public/products', time() . '.' . $file->getClientOriginalExtension());
+        $path = $file->storeAs('public/products', time() . '.' . $file->getClientOriginalExtension());
 
 
-        // Product::create([
-        //     'name' => $request->name,
-        //     'description' => $request->description,
-        //     'price' => $request->price,
-        //     'category_id' => $request->category_id,
-        //     'subcategory_id' => $request->subcategory_id,
-        //     'excel_file' => $path,
-        // ]);
+        Product::create([
+            'name' => $request->name,
+            'description' => $request->description,
+            'price' => $request->price,
+            'category_id' => $request->category_id,
+            'subcategory_id' => $request->subcategory_id,
+            'excel_file' => $path,
+        ]);
 
-        // return response()->json(['message' => 'Product uploaded successfully'], 200);
-
-        try {
-            Excel::import(new ProductsImport(), $file);
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Product uploaded successfully'
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ], 500);
-        }
+        return response()->json(['message' => 'Product uploaded successfully'], 200);
     }
 
 
-    public function getProduct(Request $request)
+    public function getProduct()
     {
-        $validated = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'subcategory_id' => 'required|exists:subcategories,id',
+        $products = Product::with('category', 'subcategory')->get();
+
+        return response()->json([
+            'status' => 'success',
+            'products' => $products
         ]);
-
-        $products = Product::where('category_id', $validated['category_id'])
-            ->where('subcategory_id', $validated['subcategory_id'])
-            ->get();
-
-        return response()->json($products);
     }
 }

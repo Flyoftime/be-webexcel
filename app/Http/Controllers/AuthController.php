@@ -31,8 +31,8 @@ class AuthController extends Controller
                 'email' => $validated['email'],
                 'password' => $validated['password'] ? Hash::make($validated['password']) : null, // Hash jika password ada
             ]);
-            
-            
+
+
             if ($request->provider === 'google') {
                 $user->provider = 'google';
                 $user->save();
@@ -49,14 +49,14 @@ class AuthController extends Controller
             // Tangkap error validasi
             return response()->json([
                 'message' => 'Validation failed',
-                'errors' => $e->errors(), 
-            ], 422); 
+                'errors' => $e->errors(),
+            ], 422);
         } catch (\Exception $e) {
-            
+
             return response()->json([
                 'message' => 'Registration failed',
                 'error' => $e->getMessage(),
-            ], 500); 
+            ], 500);
         }
     }
 
@@ -64,19 +64,19 @@ class AuthController extends Controller
     // Login
     public function login(Request $request)
     {
-        
+
         $validated = $request->validate([
             'email' => 'required|email',
             'password' => 'required|min:6',
         ]);
 
-        
+
         $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
 
-            
+
             $token = $user->createToken('authToken')->plainTextToken;
 
             return response()->json([
@@ -87,19 +87,25 @@ class AuthController extends Controller
             ]);
         }
 
-        
+
         return response()->json([
             'message' => 'Invalid credentials. Please check your email or password.',
             'status' => 'error',
             'errors' => [
                 'email' => 'The provided credentials do not match our records.',
             ]
-        ], 401); 
+        ], 401);
     }
 
-   
-    public function user(Request $request)
-    {
-        return response()->json($request->user());
-    }
+
+   public function getUser()
+   {
+       $user = Auth::user();
+
+       return response()->json([
+           'message' => 'User retrieved successfully',
+           'status' => 'success',
+           'user' => $user,
+       ]);
+   }
 }
