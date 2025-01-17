@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Route;
 //Product
 Route::post('/store/product', [ProductController::class, 'upload']);
 Route::get('/get/product', [ProductController::class, 'getProduct']);
+Route::get('/get/product/{id}', [ProductController::class, 'getProductById']);
 
 //Category
 Route::get('/get/categories', [CategoriesController::class, 'getCategories']);
@@ -40,8 +41,7 @@ Route::delete('/delete/subcategories/{id}', [SubCategoriesController::class, 'de
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/login-google', [AuthController::class, 'loginGoogle']);
-Route::post('/upload-products', [ProductController::class, 'upload'])->name('upload.products');
-
+Route::get('/get/user',[AuthController::class, 'getUser']);
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
 // });

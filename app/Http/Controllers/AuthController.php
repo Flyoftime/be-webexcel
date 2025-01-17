@@ -15,17 +15,17 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         try {
-            
+
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users,email',
                 'password' => $request->has('provider') && $request->provider === 'google'
-                    ? 'nullable'  
-                    : 'required|string|min:8',  
+                    ? 'nullable'
+                    : 'required|string|min:8',
                 'provider' => 'nullable|in:google',
             ]);
 
-            
+
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
@@ -64,7 +64,7 @@ class AuthController extends Controller
     // Login
     public function login(Request $request)
     {
-        
+
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|min:6',
@@ -89,7 +89,7 @@ class AuthController extends Controller
                     'errors' => [
                         'email' => 'The provided credentials do not match our records.',
                     ]
-                ], 401); 
+                ], 401);
             }
         } else {
             return response()->json([
@@ -98,14 +98,10 @@ class AuthController extends Controller
                 'errors' => [
                     'email' => 'The provided credentials do not match our records.',
                 ]
-            ], 401); 
+            ], 401);
         }
     }
-    
-    public function user(Request $request)
-    {
-        return response()->json($request->user());
-    }
+
     public function loginGoogle(Request $request) {
         $user = User::where('email', $request->email)->first();
 
@@ -125,7 +121,16 @@ class AuthController extends Controller
                 'errors' => [
                     'email' => 'The provided google account is not linked to your account',
                 ]
-            ], 403); 
+            ], 403);
         }
+    }
+
+   public function getUser()
+    {
+        $user = User::all();
+
+        return response()->json([
+            'user' => $user,
+        ]);
     }
 }

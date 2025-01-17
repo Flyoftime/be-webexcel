@@ -45,4 +45,14 @@ class ProductController extends Controller
             'products' => $products
         ]);
     }
+
+    public function getProductById($id)
+    {
+        $products = Product::where('id',$id)->first();
+
+        return response()->json([
+            'status' => 'success',
+            'products' => $products
+        ]);
+    }
 }
