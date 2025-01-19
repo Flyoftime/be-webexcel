@@ -48,11 +48,18 @@ class ProductController extends Controller
 
     public function getProductById($id)
     {
-        $products = Product::where('id',$id)->first();
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json(['status' => 'error', 'message' => 'Product not found'], 404);
+        }
+
+        // Tambahkan URL lengkap untuk file Excel
+        $product->excel_file_url = url('storage/' . str_replace('public/', '', $product->excel_file));
 
         return response()->json([
             'status' => 'success',
-            'products' => $products
+            'products' => $product
         ]);
     }
 }

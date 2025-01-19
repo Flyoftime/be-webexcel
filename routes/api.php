@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SubCategoriesController;
+use App\Http\Controllers\OrdersController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +18,11 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+//Transaction
+Route::post('/orders', [OrdersController::class, 'createOrders']);
+Route::get('/orders', [OrdersController::class, 'getOrders']);
+
 
 //Product
 Route::post('/store/product', [ProductController::class, 'upload']);

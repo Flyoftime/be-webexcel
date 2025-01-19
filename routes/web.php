@@ -15,7 +15,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return response()->json([
-        'user' => Auth::user(),
-    ]);
+    return view('welcome');
+});
+
+Route::get('/getfile', function() {
+    $route = route('getFile', [$id=1]);
 });
