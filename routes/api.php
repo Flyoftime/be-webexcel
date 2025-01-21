@@ -29,6 +29,7 @@ Route::post('/store/product', [ProductController::class, 'upload']);
 Route::get('/get/product', [ProductController::class, 'getProduct']);
 Route::get('/get/product/{id}', [ProductController::class, 'getProductById']);
 Route::get('/get/productExcel/{id}', [ProductController::class, 'getExcelUrl']);
+Route::get('/get-excel-data/{id}', [ProductController::class, 'getExcelData']);
 
 //Category
 Route::get('/get/categories', [CategoriesController::class, 'getCategories']);
