@@ -44,9 +44,9 @@ class AuthController extends Controller
             return response()->json([
                 'message' => 'User registered successfully!',
                 'user' => $user,
-            ], 201); // Status 201 Created
+            ], 201); 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            // Tangkap error validasi
+            
             return response()->json([
                 'message' => 'Validation failed',
                 'errors' => $e->errors(),

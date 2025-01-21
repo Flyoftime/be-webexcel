@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Product;
@@ -9,107 +8,118 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ProductController extends Controller
 {
-    public function upload(Request $request)
-    {
-        // Validate the incoming request
-        $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv|max:2048',
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric',
-            'description' => 'nullable|string',
-            'category_id' => 'required|exists:categories,id',
-            'subcategory_id' => 'required|exists:subcategories,id',
-        ]);
+public function upload(Request $request)
+{
+// Validate the incoming request
+$request->validate([
+'file' => 'required|mimes:xlsx,xls,csv|max:2048',
+'name' => 'required|string|max:255',
+'price' => 'required|numeric',
+'description' => 'nullable|string',
+'category_id' => 'required|exists:categories,id',
+'subcategory_id' => 'required|exists:subcategories,id',
+]);
 
-        // Handle file upload
-        $file = $request->file('file');
-        $path = $file->storeAs('public/products', time() . '.' . $file->getClientOriginalExtension());
+// Check for existing product with the same name, price, or file
+$existingProduct = Product::where('name', $request->name)
+->where('price', $request->price)
+->whereHas('excel_file', function ($query) use ($request) {
+// Extract the filename from the uploaded file and check if it exists
+$fileName = time() . '.' . $request->file('file')->getClientOriginalExtension();
+$query->where('excel_file', 'like', "%$fileName%");
+})
+->first();
 
-        // Create the product record
-        Product::create([
-            'name' => $request->name,
-            'description' => $request->description,
-            'price' => $request->price,
-            'category_id' => $request->category_id,
-            'subcategory_id' => $request->subcategory_id,
-            'excel_file' => $path,
-        ]);
+if ($existingProduct) {
+return response()->json(['message' => 'Product with the same name, price, or file already exists.'], 400);
+}
 
-        return response()->json(['message' => 'Product uploaded successfully'], 200);
-    }
+// Handle file upload
+$file = $request->file('file');
+$path = $file->storeAs('public/products', time() . '.' . $file->getClientOriginalExtension());
 
-    public function getProduct()
-    {
-        // Fetch products with their relations
-        $products = Product::with('category', 'subcategory')->get();
+// Create the product record with 'approved' status
+Product::create([
+'name' => $request->name,
+'description' => $request->description,
+'price' => $request->price,
+'category_id' => $request->category_id,
+'subcategory_id' => $request->subcategory_id,
+'excel_file' => $path,
+'status' => 'approved', // Auto-approve the product
+]);
 
-        return response()->json([
-            'status' => 'success',
-            'products' => $products
-        ]);
-    }
+return response()->json(['message' => 'Product uploaded and approved successfully'], 200);
+}
 
-    public function getProductById($id)
-    {
-        $product = Product::find($id);
+public function getProduct()
+{
+// Fetch products with their relations
+$products = Product::with('category', 'subcategory')->get();
 
-        if (!$product) {
-            return response()->json(['status' => 'error', 'message' => 'Product not found'], 404);
-        }
+return response()->json([
+'status' => 'success',
+'products' => $products
+]);
+}
 
-        // Generate a public URL for the Excel file
-        $product->excel_file_url = asset('storage/' . str_replace('public/', '', $product->excel_file));
+public function getProductById($id)
+{
+$product = Product::find($id);
 
-        return response()->json([
-            'status' => 'success',
-            'products' => $product,
-        ]);
-    }
+if (!$product) {
+return response()->json(['status' => 'error', 'message' => 'Product not found'], 404);
+}
 
-    public function getExcelUrl($id)
-    {
-        // Cari produk berdasarkan ID
-        $product = Product::find($id);
+$product->excel_file_url = asset('storage/' . str_replace('public/', '', $product->excel_file));
 
-        // Jika produk ditemukan
-        if ($product) {
-            // Buat URL publik untuk file Excel
-            $fileUrl = asset('storage/' . str_replace('public/', '', $product->excel_file));
+return response()->json([
+'status' => 'success',
+'products' => $product,
+]);
+}
 
-            return response()->json([
-                'status' => 'success',
-                'url' => $fileUrl,
-            ]);
-        }
+public function getExcelUrl($id)
+{
+$product = Product::find($id);
 
-        // Jika produk tidak ditemukan
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Product not found'
-        ], 404);
-    }
+if ($product) {
+$fileUrl = asset('storage/' . str_replace('public/', '', $product->excel_file));
 
-    public function getExcelData($id)
-    {
-        $product = Product::find($id);
+return response()->json([
+'status' => 'success',
+'url' => $fileUrl,
+]);
+}
 
-        if (!$product) {
-            return response()->json(['status' => 'error', 'message' => 'Product not found'], 404);
-        }
+// If product not found
+return response()->json([
+'status' => 'error',
+'message' => 'Product not found'
+], 404);
+}
 
-        $filePath = storage_path('app/' . $product->excel_file);
+public function getExcelData($id)
+{
+$product = Product::find($id);
 
-        try {
-            $spreadsheet = IOFactory::load($filePath);
-            $sheet = $spreadsheet->getActiveSheet();
-            $data = $sheet->toArray();
-        } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => 'Error reading Excel file: ' . $e->getMessage()], 500);
-        }
+if (!$product) {
+return response()->json(['status' => 'error', 'message' => 'Product not found'], 404);
+}
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $data,
-        ]);
-    }
+$filePath = storage_path('app/' . $product->excel_file);
+
+try {
+$spreadsheet = IOFactory::load($filePath);
+$sheet = $spreadsheet->getActiveSheet();
+$data = $sheet->toArray();
+} catch (\Exception $e) {
+return response()->json(['status' => 'error', 'message' => 'Error reading Excel file: ' . $e->getMessage()], 500);
+}
+
+return response()->json([
+'status' => 'success',
+'data' => $data,
+]);
+}
 }
