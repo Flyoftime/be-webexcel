@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
     public function upload(Request $request)
     {
+        // Validate the incoming request
         $request->validate([
             'file' => 'required|mimes:xlsx,xls,csv|max:2048',
             'name' => 'required|string|max:255',
@@ -18,11 +20,11 @@ class ProductController extends Controller
             'subcategory_id' => 'required|exists:subcategories,id',
         ]);
 
-
+        // Handle file upload
         $file = $request->file('file');
         $path = $file->storeAs('public/products', time() . '.' . $file->getClientOriginalExtension());
 
-
+        // Create the product record
         Product::create([
             'name' => $request->name,
             'description' => $request->description,
@@ -35,9 +37,9 @@ class ProductController extends Controller
         return response()->json(['message' => 'Product uploaded successfully'], 200);
     }
 
-
     public function getProduct()
     {
+        // Fetch products with their relations
         $products = Product::with('category', 'subcategory')->get();
 
         return response()->json([
@@ -54,12 +56,35 @@ class ProductController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Product not found'], 404);
         }
 
-        // Tambahkan URL lengkap untuk file Excel
-        $product->excel_file_url = url('storage/' . str_replace('public/', '', $product->excel_file));
+        // Generate a public URL for the Excel file
+        $product->excel_file_url = asset('storage/' . str_replace('public/', '', $product->excel_file));
 
         return response()->json([
             'status' => 'success',
-            'products' => $product
+            'products' => $product,
         ]);
+    }
+
+    public function getExcelUrl($id)
+    {
+        // Cari produk berdasarkan ID
+        $product = Product::find($id);
+
+        // Jika produk ditemukan
+        if ($product) {
+            // Buat URL publik untuk file Excel
+            $fileUrl = asset('storage/' . str_replace('public/', '', $product->excel_file));
+
+            return response()->json([
+                'status' => 'success',
+                'url' => $fileUrl,
+            ]);
+        }
+
+        // Jika produk tidak ditemukan
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Product not found'
+        ], 404);
     }
 }
