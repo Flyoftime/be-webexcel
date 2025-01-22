@@ -15,16 +15,17 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('name');  
-            $table->text('description');  
-            $table->decimal('price', 10, 2);  
-            $table->foreignId('category_id')  
+            $table->string('name');
+            $table->text('description');
+            $table->decimal('price', 10, 2);
+            $table->foreignId('category_id')
                 ->constrained()
-                ->onDelete('restrict');  
-            $table->foreignId('subcategory_id')  
+                ->onDelete('restrict');
+            $table->foreignId('subcategory_id')
                 ->constrained()
                 ->onDelete('restrict');
             $table->string('excel_file');
+            $table->timestamp('last_purchased_at')->nullable;
             $table->timestamps();
         });
     }

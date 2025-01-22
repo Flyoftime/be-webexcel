@@ -44,17 +44,14 @@ class OrdersController extends Controller
 
 
         try {
-            // Membuat transaksi di Midtrans
             $paymentUrl = Snap::createTransaction($params)->redirect_url;
 
-            // Menyimpan order_id dan data terkait ke tabel orders
             $order = Order::create([
                 'user_id' => $user->id,
                 'product_id' => $request->product_id,
                 'status' => StatusEnums::cases()
             ]);
 
-            // Mengembalikan URL pembayaran dari Midtrans
             return response()->json([
                 'payment_url' => $paymentUrl,
                 'order' => $order // Menyertakan data order yang baru disimpan
