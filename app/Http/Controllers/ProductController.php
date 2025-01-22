@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class ProductController extends Controller
 {
@@ -86,5 +87,29 @@ class ProductController extends Controller
             'status' => 'error',
             'message' => 'Product not found'
         ], 404);
+    }
+
+    public function getExcelData($id)
+    {
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json(['status' => 'error', 'message' => 'Product not found'], 404);
+        }
+
+        $filePath = storage_path('app/' . $product->excel_file);
+
+        try {
+            $spreadsheet = IOFactory::load($filePath);
+            $sheet = $spreadsheet->getActiveSheet();
+            $data = $sheet->toArray();
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'error', 'message' => 'Error reading Excel file: ' . $e->getMessage()], 500);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $data,
+        ]);
     }
 }
