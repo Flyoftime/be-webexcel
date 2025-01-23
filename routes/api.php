@@ -39,7 +39,7 @@ Route::delete('/delete/categories/{id}', [CategoriesController::class, 'deleteCa
 
 //SubCategory
 Route::get('/subcategories', [SubCategoriesController::class, 'getSubCategories']);
-Route::post('/store/subcategories', [SubCategoriesController::class, 'storeSubCategories']);
+Route::post('/store/subcategories', [SubCategoriesController::class, 'setSubCategories']);
 Route::put('/edit/subcategories/{id}', [SubCategoriesController::class, 'updateSubCategories']);
 Route::delete('/delete/subcategories/{id}', [SubCategoriesController::class, 'deleteSubCategories']);
 
@@ -50,6 +50,8 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/login-google', [AuthController::class, 'loginGoogle']);
 Route::get('/get/user',[AuthController::class, 'getUser']);
+Route::put('/user/{id}/edit', [AuthController::class, 'editUser']);
+
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 //     return $request->user();
 // });
