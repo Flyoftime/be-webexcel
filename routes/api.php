@@ -23,9 +23,12 @@ use Illuminate\Support\Facades\Route;
 Route::post('/orders', [OrdersController::class, 'createOrders']);
 Route::get('/orders', [OrdersController::class, 'getOrders']);
 
+Route::group(['middleware' => 'auth:sanctum'], function () {
+
+    Route::post('/store/product', [ProductController::class, 'upload']);
+});
 
 //Product
-Route::post('/store/product', [ProductController::class, 'upload']);
 Route::get('/get/product', [ProductController::class, 'getProduct']);
 Route::get('/get/product/{id}', [ProductController::class, 'getProductById']);
 Route::get('/get/productExcel/{id}', [ProductController::class, 'getExcelUrl']);

@@ -2,30 +2,43 @@
 
 namespace App\Notifications;
 
+use App\Models\Product;
+use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
-use Illuminate\Notifications\Messages\MailMessage;
 
 class ProductReminder extends Notification
 {
-    protected $product;
+    use Queueable;
 
-    public function __construct($product)
+    public $product;
+
+    /**
+     * Create a new notification instance.
+     */
+    public function __construct(Product $product)
     {
         $this->product = $product;
     }
 
+    /**
+     * Get the notification's delivery channels.
+     */
     public function via($notifiable)
     {
-        return ['mail'];
+        return ['mail']; // Menggunakan email untuk notifikasi
     }
 
+    /**
+     * Get the mail representation of the notification.
+     */
     public function toMail($notifiable)
     {
-        return (new MailMessage)
-            ->subject('Product Reminder')
-            ->line('Hi ' . $notifiable->name . ',')
-            ->line('The product "' . $this->product->name . '" has not been purchased for 25 days.')
-            ->line('Please update the product details and ensure it is still available for purchase.');
+        return (new \Illuminate\Notifications\Messages\MailMessage)
+            ->subject('Pengingat: Produk Anda Akan Dihapus')
+            ->greeting('Halo, ' . $notifiable->name)
+            ->line("Produk Anda **{$this->product->name}** belum ada pembelian dalam 25 hari.")
+            ->line('Produk Anda akan dihapus dari sistem dalam waktu 5 hari jika tidak ada pembelian.')
+            ->action('Lihat Produk Anda', url('/products/' . $this->product->id))
+            ->line('Harap pastikan produk Anda menarik perhatian pelanggan.');
     }
 }
-

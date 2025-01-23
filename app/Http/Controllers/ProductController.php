@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -11,7 +12,6 @@ class ProductController extends Controller
 {
     public function upload(Request $request)
     {
-        // Validate the incoming request
         $request->validate([
             'file' => 'required|mimes:xlsx,xls,csv|max:2048',
             'name' => 'required|string|max:255',
@@ -21,11 +21,14 @@ class ProductController extends Controller
             'subcategory_id' => 'required|exists:subcategories,id',
         ]);
 
-        // Handle file upload
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+        dd($user);
         $file = $request->file('file');
         $path = $file->storeAs('public/products', time() . '.' . $file->getClientOriginalExtension());
 
-        // Create the product record
         Product::create([
             'name' => $request->name,
             'description' => $request->description,
@@ -33,8 +36,8 @@ class ProductController extends Controller
             'category_id' => $request->category_id,
             'subcategory_id' => $request->subcategory_id,
             'excel_file' => $path,
+            'user_id' => $user->id
         ]);
-
         return response()->json(['message' => 'Product uploaded successfully'], 200);
     }
 

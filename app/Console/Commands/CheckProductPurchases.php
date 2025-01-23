@@ -13,32 +13,29 @@ class CheckProductPurchases extends Command
     protected $description = 'Send reminders for products without purchases and delete them after 30 days';
 
     public function handle()
-    {
-        $now = now();
+    {$now = now(); // Ambil waktu sekarang
 
-        // Ambil semua produk milik seller
-        $products = Product::whereHas('owner', function ($query) {
-            $query->where('role_id', 2); // Role 2 = Seller
+        // Ambil semua produk dan pemiliknya (role 2 adalah seller)
+        $products = Product::whereHas('user', function ($query) {
+            $query->where('role', 2); // Hanya pemilik dengan role seller
         })->get();
 
         foreach ($products as $product) {
-            $daysSinceLastPurchase = $product->last_purchased_at
+            $lastPurchasedDays = $product->last_purchased_at
                 ? $now->diffInDays($product->last_purchased_at)
-                : 30;
+                : 30; // Jika belum pernah dibeli, anggap sudah 30 hari
 
-            // Kirim notifikasi jika sudah 25 hari
-            if ($daysSinceLastPurchase == 25) {
-                Notification::send($product->owner, new ProductReminder($product));
-                $this->info('Reminder sent for product ID: ' . $product->id);
+            // Kirim pengingat pada hari ke-25
+            if ($lastPurchasedDays == 25) {
+                $product->owner->notify(new ProductReminder($product));
+                $this->info("Pengingat dikirim untuk produk {$product->name}.");
             }
 
-            // Hapus produk jika sudah 30 hari
-            if ($daysSinceLastPurchase >= 30) {
+            // Hapus produk pada hari ke-30
+            if ($lastPurchasedDays >= 30) {
                 $product->delete();
-                $this->info('Deleted product ID: ' . $product->id);
+                $this->info("Produk {$product->name} telah dihapus karena tidak ada pembelian dalam 30 hari.");
             }
         }
-
-        $this->info('Processed reminders and deletions for products.');
     }
 }

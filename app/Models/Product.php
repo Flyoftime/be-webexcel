@@ -16,6 +16,7 @@ class Product extends Model
         'category_id',
         'subcategory_id',
         'excel_file',
+        'user_id',
     ];
 
     public function category()
@@ -37,5 +38,10 @@ class Product extends Model
     public function owner()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
     }
 }

@@ -44,9 +44,9 @@ class AuthController extends Controller
             return response()->json([
                 'message' => 'User registered successfully!',
                 'user' => $user,
-            ], 201); 
+            ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            
+
             return response()->json([
                 'message' => 'Validation failed',
                 'errors' => $e->errors(),
@@ -132,4 +132,5 @@ class AuthController extends Controller
             'user' => $user,
         ]);
     }
+    
 }

@@ -18,6 +18,9 @@ return new class extends Migration
             $table->string('name');
             $table->text('description');
             $table->decimal('price', 10, 2);
+            $table->foreignId('user_id')
+                ->constrained()
+                ->onDelete('restrict');
             $table->foreignId('category_id')
                 ->constrained()
                 ->onDelete('restrict');
@@ -25,7 +28,7 @@ return new class extends Migration
                 ->constrained()
                 ->onDelete('restrict');
             $table->string('excel_file');
-            $table->timestamp('last_purchased_at')->nullable;
+            $table->timestamp('last_purchased_at')->nullable();
             $table->timestamps();
         });
     }

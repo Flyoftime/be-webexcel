@@ -43,4 +43,8 @@ class User extends Authenticatable
         'role' => 'string',
         'email_verified_at' => 'datetime',
     ];
+
+    public function products() {
+        return $this->belongsTo(Product::class);
+    }
 }
