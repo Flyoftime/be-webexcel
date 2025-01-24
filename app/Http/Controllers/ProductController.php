@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -21,30 +21,26 @@ class ProductController extends Controller
             'subcategory_id' => 'required|exists:subcategories,id',
         ]);
 
-        $user = auth()->user();
-        if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
-        }
-        dd($user);
+
         $file = $request->file('file');
         $path = $file->storeAs('public/products', time() . '.' . $file->getClientOriginalExtension());
 
-        Product::create([
+        $product = Auth::user()->products()->create([
             'name' => $request->name,
-            'description' => $request->description,
             'price' => $request->price,
+            'description' => $request->description,
             'category_id' => $request->category_id,
             'subcategory_id' => $request->subcategory_id,
-            'excel_file' => $path,
-            'user_id' => $user->id
+            'excel_file' => $path
         ]);
+
         return response()->json(['message' => 'Product uploaded successfully'], 200);
     }
 
     public function getProduct()
     {
         // Fetch products with their relations
-        $products = Product::with('category', 'subcategory')->get();
+        $products = Product::with('user', 'category', 'subcategory')->get();
 
         return response()->json([
             'status' => 'success',

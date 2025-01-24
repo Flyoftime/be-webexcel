@@ -23,13 +23,10 @@ use Illuminate\Support\Facades\Route;
 Route::post('/orders', [OrdersController::class, 'createOrders']);
 Route::get('/orders', [OrdersController::class, 'getOrders']);
 
-Route::group(['middleware' => 'auth:sanctum'], function () {
-
-    Route::post('/store/product', [ProductController::class, 'upload']);
-});
-
+Route::post('/set/product', [ProductController::class, 'setProductUser']);
 //Product
 Route::get('/get/product', [ProductController::class, 'getProduct']);
+Route::post('/store/product', [ProductController::class, 'upload'])->middleware('auth:sanctum');
 Route::get('/get/product/{id}', [ProductController::class, 'getProductById']);
 Route::get('/get/productExcel/{id}', [ProductController::class, 'getExcelUrl']);
 Route::get('/get-excel-data/{id}', [ProductController::class, 'getExcelData']);
@@ -41,7 +38,7 @@ Route::put('/edit/categories/{id}', [CategoriesController::class, 'updateCategor
 Route::delete('/delete/categories/{id}', [CategoriesController::class, 'deleteCategories']);
 
 //SubCategory
-Route::get('/subcategories', [SubCategoriesController::class, 'getSubCategories']);
+Route::get('get/subcategories', [SubCategoriesController::class, 'getSubCategories']);
 Route::post('/store/subcategories', [SubCategoriesController::class, 'setSubCategories']);
 Route::put('/edit/subcategories/{id}', [SubCategoriesController::class, 'updateSubCategories']);
 Route::delete('/delete/subcategories/{id}', [SubCategoriesController::class, 'deleteSubCategories']);
@@ -53,6 +50,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/login-google', [AuthController::class, 'loginGoogle']);
 Route::get('/get/user',[AuthController::class, 'getUser']);
+Route::get('/get/user/{id}',[AuthController::class, 'getUserById']);
 Route::put('/user/{id}/edit', [AuthController::class, 'editUser']);
 
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

@@ -168,4 +168,21 @@ class AuthController extends Controller
             'user' => $user,
         ]);
     }
+
+    public function getUserById($id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'user' => $user,
+        ]);
+    }
 }
