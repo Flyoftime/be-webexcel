@@ -9,7 +9,7 @@ class CategoriesController extends Controller
 {
     public function setCategories(Request $request)
     {
-        // Validasi jika nama kategori tidak ada
+
         if (!$request->name) {
             return response()->json([
                 'status' => 'error',
@@ -17,7 +17,7 @@ class CategoriesController extends Controller
             ], 403);
         }
 
-        // Pengecekan apakah kategori dengan nama yang sama sudah ada
+
         $categories = Category::where('name', $request->name)->first();
 
         if ($categories) {
@@ -105,5 +105,24 @@ class CategoriesController extends Controller
                 'message' => 'Failed to delete category'
             ], 500);
         }
+    }
+
+    public function getProductsByCategory($categoryName)
+    {
+        
+        $category = Category::where('name', $categoryName)->with('products')->first();
+
+        if (!$category) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Category not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'category' => $category->name,
+            'products' => $category->products
+        ], 200);
     }
 }

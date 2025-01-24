@@ -34,12 +34,15 @@ Route::post('/purchase-product/{id}', [ProductController::class, 'purchaseProduc
 
 //Category
 Route::get('/get/categories', [CategoriesController::class, 'getCategories']);
+Route::get('/get/categories/{id}', [CategoriesController::class, 'getCategories']);
 Route::post('/store/categories', [CategoriesController::class, 'setCategories']);
 Route::put('/edit/categories/{id}', [CategoriesController::class, 'updateCategories']);
 Route::delete('/delete/categories/{id}', [CategoriesController::class, 'deleteCategories']);
+Route::get('/categories/{name}/products', [CategoriesController::class, 'getProductsByCategory']);
 
 //SubCategory
 Route::get('get/subcategories', [SubCategoriesController::class, 'getSubCategories']);
+Route::get('get/subcategories/{id}', [SubCategoriesController::class, 'getSubCategories']);
 Route::post('/store/subcategories', [SubCategoriesController::class, 'setSubCategories']);
 Route::put('/edit/subcategories/{id}', [SubCategoriesController::class, 'updateSubCategories']);
 Route::delete('/delete/subcategories/{id}', [SubCategoriesController::class, 'deleteSubCategories']);
