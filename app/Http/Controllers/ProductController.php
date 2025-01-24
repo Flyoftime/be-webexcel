@@ -101,7 +101,10 @@ class ProductController extends Controller
         $hasPurchased = Order::where('user_id', $user)->where('product_id', $product->id)->exists();
 
         if (!$hasPurchased) {
-            return response()->json(['status' => 'error', 'message' => 'You have not purchased this product'], 403);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You have not purchased this product',
+            ], 403);
         }
 
         $filePath = storage_path('app/' . $product->excel_file);
@@ -110,8 +113,13 @@ class ProductController extends Controller
             $spreadsheet = IOFactory::load($filePath);
             $sheet = $spreadsheet->getActiveSheet();
             $data = $sheet->toArray();
+
         } catch (\Exception $e) {
-            return response()->json(['status' => 'error', 'message' => 'Error reading Excel file: ' . $e->getMessage()], 500);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error reading Excel file: ',
+                'error' => $e->getMessage(),
+            ], 500);
         }
 
         return response()->json([

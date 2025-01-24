@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Enums\StatusEnums;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\User;
@@ -22,49 +24,77 @@ class OrdersController extends Controller
     }
 
     public function createOrders(Request $request)
-{
-    $request->validate([
-        'id' => 'required|exists:users,id',
-        'product_id' => 'required|exists:products,id',
-        'gross_amount' => 'required|numeric',
-    ]);
-
-    $user = User::find($request->id);
-    $order_id = Str::uuid();
-
-    $params = [
-        'transaction_details' => [
-            'order_id' => $order_id,
-            'gross_amount' => $request->gross_amount,
-        ],
-        'customer_details' => [
-            'first_name' => $user->name,
-            'last_name' => '',
-            'email' => $user->email,
-            'phone' => '',
-        ],
-    ];
-
-    try {
-        $paymentUrl = Snap::createTransaction($params)->redirect_url;
-
-        $order = Order::create([
-            'user_id' => $user->id,
-            'product_id' => $request->product_id,
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'gross_amount' => 'required|numeric',
         ]);
 
-        $product = \App\Models\Product::find($request->product_id);
-        $product->last_purchased_at = now();
-        $product->save();
+        $user = Auth::user();
+        $order_id = Str::uuid();
 
-        return response()->json([
-            'payment_url' => $paymentUrl,
-            'order' => $order,
-        ]);
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
+        $params = [
+            'transaction_details' => [
+                'order_id' => $order_id,
+                'gross_amount' => $request->gross_amount,
+            ],
+            'customer_details' => [
+                'first_name' => $user->name,
+                'last_name' => '',
+                'email' => $user->email,
+                'phone' => '',
+            ],
+        ];
+
+        try {
+            $paymentUrl = Snap::createTransaction($params)->redirect_url;
+
+            // Create the order in the database
+            $order = Order::create([
+                'user_id' => $user->id, // Correct way to assign user_id
+                'product_id' => $request->product_id,
+                'order_id' => $order_id,
+            ]);
+
+            // Update product's last purchased timestamp
+            $product = Product::find($request->product_id);
+            $product->last_purchased_at = now();
+            $product->save();
+
+            return response()->json([
+                'payment_url' => $paymentUrl,
+                'order' => $order,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
-}
+
+
+    public function paymentCallback(Request $request)
+    {
+        $order_id = $request->input('order_id');
+        $payment_status = $request->input('payment_status'); // Depending on the payment gateway
+
+        // Find the order by ID
+        $order = Order::where('order_id', $order_id)->first();
+
+        if (!$order) {
+            return response()->json(['error' => 'Order not found'], 404);
+        }
+
+        // Update the order status based on the payment status
+        if ($payment_status === 'success') {
+            $order->status = 'completed'; // Mark the order as completed
+        } else {
+            $order->status = 'failed'; // Mark the order as failed
+        }
+
+        $order->save();
+
+        return response()->json(['status' => 'success', 'order' => $order]);
+    }
+
 
     public function getOrders()
     {
@@ -73,6 +103,4 @@ class OrdersController extends Controller
             'orders' => $orders,
         ]);
     }
-
-
 }

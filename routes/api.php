@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 //Transaction
-Route::post('/orders', [OrdersController::class, 'createOrders']);
+Route::post('/set/orders', [OrdersController::class, 'createOrders'])->middleware('auth:sanctum');
 Route::get('/orders', [OrdersController::class, 'getOrders']);
 
 Route::post('/set/product', [ProductController::class, 'setProductUser']);
@@ -30,7 +30,7 @@ Route::post('/store/product', [ProductController::class, 'upload'])->middleware(
 Route::get('/get/product/{id}', [ProductController::class, 'getProductById']);
 Route::get('/get/productExcel/{id}', [ProductController::class, 'getExcelUrl']);
 Route::get('/get-excel-data/{id}', [ProductController::class, 'getExcelData']);
-Route::post('/purchase-product/{id}', [ProductController::class, 'purchaseProduct']);
+
 
 //Category
 Route::get('/get/categories', [CategoriesController::class, 'getCategories']);
