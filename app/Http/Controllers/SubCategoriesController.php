@@ -9,13 +9,13 @@ class SubCategoriesController extends Controller
 {
     public function setSubCategories(Request $request)
     {
-        // Validasi inputan
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id'
         ]);
 
-        // Pengecekan apakah subkategori sudah ada
+    
         $subcategories = SubCategory::where('name', $request->name)
             ->where('category_id', $request->category_id)
             ->first();
