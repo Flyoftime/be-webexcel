@@ -11,7 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class AuthController extends Controller
 {
-    // Registrasi
+
     public function register(Request $request)
     {
         try {
@@ -71,8 +71,8 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if($user) {
-            if(Hash::check($request->password, $user->password)) {
+        if ($user) {
+            if (Hash::check($request->password, $user->password)) {
                 $token = $user->createToken('authToken')->plainTextToken;
 
                 return response()->json([
@@ -101,10 +101,11 @@ class AuthController extends Controller
         }
     }
 
-    public function loginGoogle(Request $request) {
+    public function loginGoogle(Request $request)
+    {
         $user = User::where('email', $request->email)->first();
 
-        if($user && $user->provider == 'google'){
+        if ($user && $user->provider == 'google') {
             $token = $user->createToken('authToken')->plainTextToken;
 
             return response()->json([
@@ -124,7 +125,7 @@ class AuthController extends Controller
         }
     }
 
-   public function getUser()
+    public function getUser()
     {
         $user = User::all();
 
@@ -132,5 +133,39 @@ class AuthController extends Controller
             'user' => $user,
         ]);
     }
-    
+
+    public function editUser(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'nullable|string|max:255',
+            'password' => 'nullable|string|min:8',
+            'role' => 'nullable|in:Admin,User,Seller',
+        ]);
+
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        if ($request->has('name')) {
+            $user->name = $request->name;
+        }
+        if ($request->has('password')) {
+            $user->password = bcrypt($request->password);
+        }
+        if ($request->has('role')) {
+            $user->role = $request->role;
+        }
+
+        $user->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'User updated successfully',
+            'user' => $user,
+        ]);
+    }
 }

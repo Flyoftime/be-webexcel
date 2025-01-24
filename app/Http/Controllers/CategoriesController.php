@@ -9,72 +9,77 @@ class CategoriesController extends Controller
 {
     public function setCategories(Request $request)
     {
+        // Validasi jika nama kategori tidak ada
         if (!$request->name) {
             return response()->json([
-                'status'=>'error',
-                'message'=>'Category name is required'
-            ],403);
+                'status' => 'error',
+                'message' => 'Category name is required'
+            ], 403);
         }
 
-        $categories = Category::where('name', $request->name)->get();
+        // Pengecekan apakah kategori dengan nama yang sama sudah ada
+        $categories = Category::where('name', $request->name)->first();
 
-        if($categories) {
+        if ($categories) {
             return response()->json([
-                'status'=>'error',
-                'message'=>'Category already exists'
-            ],409);
+                'status' => 'error',
+                'message' => 'Category already exists'
+            ], 409);
         }
 
+        // Menambahkan kategori baru
         $newCategories = Category::create([
-            'name'=>$request->name,
+            'name' => $request->name,
         ]);
 
-        if($newCategories) {
+        // Menangani hasil penyimpanan
+        if ($newCategories) {
             return response()->json([
-                'status'=>'success',
-                'message'=>'Category created successfully'
-            ],200);
+                'status' => 'success',
+                'message' => 'Category created successfully'
+            ], 200);
         } else {
             return response()->json([
-                'status'=>'error',
-                'message'=>'Failed to create category'
-            ],500);
+                'status' => 'error',
+                'message' => 'Failed to create category'
+            ], 500);
         }
     }
+
 
     public function getCategories()
     {
         $categories = Category::with('subcategories')->get();
 
         return response()->json([
-            'status'=>'success',
-            'categories'=>$categories
-        ],200);
+            'status' => 'success',
+            'categories' => $categories
+        ], 200);
     }
 
     public function putCategories(Request $request)
     {
         $categories = Category::find($request->id);
 
-        if(!$categories) {
+        if (!$categories) {
             return response()->json([
-                'status'=>'error',
-                'message'=>'Category not found'
-            ],404);
+                'status' => 'error',
+                'message' => 'Category not found'
+            ], 404);
         }
 
         $categories->name = $request->name;
 
-        if($categories->save()) {
+        if ($categories->save()) {
             return response()->json([
-                'status'=>'success',
-                'message'=>'Category updated successfully'
-            ],200);
+                'status' => 'success',
+                'message' => 'Category updated successfully'
+            ], 200);
         } else {
             return response()->json([
-                'status'=>'error',
-                'message'=>'Failed to update category'
-            ],500);
+                'status' => 'error',
+                'message' => 'Failed to update category'
+            ], 500);
         }
     }
 
@@ -82,23 +87,23 @@ class CategoriesController extends Controller
     {
         $categories = Category::find($request->id);
 
-        if(!$categories) {
+        if (!$categories) {
             return response()->json([
-                'status'=>'error',
-                'message'=>'Category not found'
-            ],404);
+                'status' => 'error',
+                'message' => 'Category not found'
+            ], 404);
         }
 
-        if($categories->delete()) {
+        if ($categories->delete()) {
             return response()->json([
-                'status'=>'success',
-                'message'=>'Category deleted successfully'
-            ],200);
+                'status' => 'success',
+                'message' => 'Category deleted successfully'
+            ], 200);
         } else {
             return response()->json([
-                'status'=>'error',
-                'message'=>'Failed to delete category'
-            ],500);
+                'status' => 'error',
+                'message' => 'Failed to delete category'
+            ], 500);
         }
     }
 }
