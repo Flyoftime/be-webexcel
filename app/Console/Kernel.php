@@ -15,7 +15,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('check:product-purchases')->daily();
+        $schedule->command('products:check-purchases')->daily();
     }
 
     /**

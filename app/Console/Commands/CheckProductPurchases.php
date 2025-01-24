@@ -13,17 +13,16 @@ class CheckProductPurchases extends Command
     protected $description = 'Send reminders for products without purchases and delete them after 30 days';
 
     public function handle()
-    {$now = now(); // Ambil waktu sekarang
+    {$now = now();
 
-        // Ambil semua produk dan pemiliknya (role 2 adalah seller)
         $products = Product::whereHas('user', function ($query) {
-            $query->where('role', 2); // Hanya pemilik dengan role seller
+            $query->where('role', 2);
         })->get();
 
         foreach ($products as $product) {
             $lastPurchasedDays = $product->last_purchased_at
                 ? $now->diffInDays($product->last_purchased_at)
-                : 30; // Jika belum pernah dibeli, anggap sudah 30 hari
+                : 30;
 
             // Kirim pengingat pada hari ke-25
             if ($lastPurchasedDays == 25) {
@@ -37,5 +36,7 @@ class CheckProductPurchases extends Command
                 $this->info("Produk {$product->name} telah dihapus karena tidak ada pembelian dalam 30 hari.");
             }
         }
+        
     }
+
 }

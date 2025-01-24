@@ -30,6 +30,7 @@ Route::post('/store/product', [ProductController::class, 'upload'])->middleware(
 Route::get('/get/product/{id}', [ProductController::class, 'getProductById']);
 Route::get('/get/productExcel/{id}', [ProductController::class, 'getExcelUrl']);
 Route::get('/get-excel-data/{id}', [ProductController::class, 'getExcelData']);
+Route::post('/purchase-product/{id}', [ProductController::class, 'purchaseProduct']);
 
 //Category
 Route::get('/get/categories', [CategoriesController::class, 'getCategories']);

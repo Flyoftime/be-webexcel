@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +16,7 @@ class ProductController extends Controller
         $request->validate([
             'file' => 'required|mimes:xlsx,xls,csv|max:2048',
             'name' => 'required|string|max:255',
-            'price' => 'required|numeric',
+            'price' => 'required|numeric|min:50000',
             'description' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
             'subcategory_id' => 'required|exists:subcategories,id',
@@ -90,10 +91,17 @@ class ProductController extends Controller
 
     public function getExcelData($id)
     {
+        $user = Auth::user();
         $product = Product::find($id);
 
         if (!$product) {
             return response()->json(['status' => 'error', 'message' => 'Product not found'], 404);
+        }
+
+        $hasPurchased = Order::where('user_id', $user)->where('product_id', $product->id)->exists();
+
+        if (!$hasPurchased) {
+            return response()->json(['status' => 'error', 'message' => 'You have not purchased this product'], 403);
         }
 
         $filePath = storage_path('app/' . $product->excel_file);
@@ -110,5 +118,35 @@ class ProductController extends Controller
             'status' => 'success',
             'data' => $data,
         ]);
+    }
+
+    public function purchaseProduct($id)
+    {
+        $user = Auth::user();
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json(['status' => 'error', 'message' => 'Product not found'], 404);
+        }
+
+        $hasPurchased = Order::where('user_id', $user->id)
+            ->where('product_id', $product->id)
+            ->exists();
+
+        if ($hasPurchased) {
+            return response()->json(['status' => 'error', 'message' => 'You already purchased this product'], 400);
+        }
+
+        Order::create([
+            'user_id' => $user->id,
+            'product_id' => $product->id,
+        ]);
+
+        // Update last purchased date
+        $product->update([
+            'last_purchased_at' => now(),
+        ]);
+
+        return response()->json(['status' => 'success', 'message' => 'Product purchased successfully'], 200);
     }
 }
