@@ -30,6 +30,9 @@ Route::post('/store/product', [ProductController::class, 'upload'])->middleware(
 Route::get('/get/product/{id}', [ProductController::class, 'getProductById']);
 Route::get('/get/productExcel/{id}', [ProductController::class, 'getExcelUrl']);
 Route::get('/get-excel-data/{id}', [ProductController::class, 'getExcelData']);
+Route::get('/get/product/{id}/download-pdf', [ProductController::class, 'downloadProductAsPDF']);
+
+
 
 
 //Category
@@ -47,7 +50,8 @@ Route::post('/store/subcategories', [SubCategoriesController::class, 'setSubCate
 Route::put('/edit/subcategories/{id}', [SubCategoriesController::class, 'updateSubCategories']);
 Route::delete('/delete/subcategories/{id}', [SubCategoriesController::class, 'deleteSubCategories']);
 
-
+//Orders
+Route::get('/get/orders', [OrdersController::class, 'getOrders']);
 
 //Auth
 Route::post('/register', [AuthController::class, 'register']);

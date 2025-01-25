@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Barryvdh\DomPDF\PDF;
 
 class ProductController extends Controller
 {
@@ -100,12 +101,12 @@ class ProductController extends Controller
 
         $hasPurchased = Order::where('user_id', $user)->where('product_id', $product->id)->exists();
 
-        if (!$hasPurchased) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You have not purchased this product',
-            ], 403);
-        }
+        // if (!$hasPurchased) {
+        //     return response()->json([
+        //         'status' => 'error',
+        //         'message' => 'You have not purchased this product',
+        //     ], 403);
+        // }
 
         $filePath = storage_path('app/' . $product->excel_file);
 
@@ -113,7 +114,6 @@ class ProductController extends Controller
             $spreadsheet = IOFactory::load($filePath);
             $sheet = $spreadsheet->getActiveSheet();
             $data = $sheet->toArray();
-
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
@@ -125,6 +125,7 @@ class ProductController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => $data,
+            'isAuthorized' => false
         ]);
     }
 
@@ -156,5 +157,21 @@ class ProductController extends Controller
         ]);
 
         return response()->json(['status' => 'success', 'message' => 'Product purchased successfully'], 200);
+    }
+
+    public function downloadProductAsPDF($id)
+    {
+        $product = Product::findOrFail($id);
+
+        // Membuat HTML secara dinamis
+        $html = '<h1>' . $product->name . '</h1>';
+        $html .= '<p>' . $product->description . '</p>';
+        $html .= '<p>Price: $' . $product->price . '</p>';
+
+        // Buat instance dari PDF terlebih dahulu
+        $pdf = PDF::loadHTML($html);
+
+        // Mengunduh PDF
+        return $pdf->download('product_' . $product->id . '.pdf');
     }
 }

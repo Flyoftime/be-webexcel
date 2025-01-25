@@ -49,14 +49,12 @@ class OrdersController extends Controller
         try {
             $paymentUrl = Snap::createTransaction($params)->redirect_url;
 
-            // Create the order in the database
             $order = Order::create([
-                'user_id' => $user->id, // Correct way to assign user_id
+                'user_id' => $user->id,
                 'product_id' => $request->product_id,
                 'order_id' => $order_id,
             ]);
 
-            // Update product's last purchased timestamp
             $product = Product::find($request->product_id);
             $product->last_purchased_at = now();
             $product->save();
@@ -98,7 +96,7 @@ class OrdersController extends Controller
 
     public function getOrders()
     {
-        $orders = Order::with('user')->get();
+        $orders = Order::with('user', 'product')->get();
         return response()->json([
             'orders' => $orders,
         ]);

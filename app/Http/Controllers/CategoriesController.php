@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class CategoriesController extends Controller
@@ -107,22 +108,15 @@ class CategoriesController extends Controller
         }
     }
 
-    public function getProductsByCategory($categoryName)
+    public function getProductsByCategory($id, $name)
     {
-        
-        $category = Category::where('name', $categoryName)->with('products')->first();
-
-        if (!$category) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Category not found'
-            ], 404);
-        }
+        // $category = Category::where('name', $name)->with('products')->first();
+        $products = Product::where('category_id', $id)->get();
 
         return response()->json([
             'status' => 'success',
-            'category' => $category->name,
-            'products' => $category->products
+            'products' => $products
         ], 200);
+
     }
 }
