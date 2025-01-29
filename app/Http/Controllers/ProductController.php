@@ -159,19 +159,4 @@ class ProductController extends Controller
         return response()->json(['status' => 'success', 'message' => 'Product purchased successfully'], 200);
     }
 
-    public function downloadProductAsPDF($id)
-    {
-        $product = Product::findOrFail($id);
-
-        // Membuat HTML secara dinamis
-        $html = '<h1>' . $product->name . '</h1>';
-        $html .= '<p>' . $product->description . '</p>';
-        $html .= '<p>Price: $' . $product->price . '</p>';
-
-        // Buat instance dari PDF terlebih dahulu
-        $pdf = PDF::loadHTML($html);
-
-        // Mengunduh PDF
-        return $pdf->download('product_' . $product->id . '.pdf');
-    }
 }

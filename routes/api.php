@@ -55,6 +55,8 @@ Route::get('/get/orders', [OrdersController::class, 'getOrders']);
 
 //Auth
 Route::post('/register', [AuthController::class, 'register']);
+Route::middleware('auth:sanctum')->post('verify-phone', [AuthController::class, 'verifyPhone']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/login-google', [AuthController::class, 'loginGoogle']);
 Route::get('/get/user',[AuthController::class, 'getUser']);

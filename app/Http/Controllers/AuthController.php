@@ -5,59 +5,92 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use App\Services\TwilioServices;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Cache;
 
 class AuthController extends Controller
 {
-
-    public function register(Request $request)
+    public function register(Request $request, TwilioServices $twilioService)
     {
         try {
-
+            // Validate the incoming request data
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users,email',
-                'password' => $request->has('provider') && $request->provider === 'google'
-                    ? 'nullable'
-                    : 'required|string|min:8',
+                'password' => $request->has('provider') && $request->provider === 'google' ? 'nullable' : 'required|string|min:8',
                 'provider' => 'nullable|in:google',
+                'phone' => 'required|unique:users|regex:/^\+?[1-9]\d{1,14}$/', // Validate phone number
             ]);
 
-
+            // Create a new user record in the database
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => $validated['password'] ? Hash::make($validated['password']) : null,
+                'phone' => $validated['phone'],
+                'provider' => $request->provider ? $validated['provider'] : null,  // Handle provider field for Google
             ]);
 
+            // Generate a 6-digit verification code
+            $verificationCode = rand(100000, 999999);
 
-            if ($request->provider === 'google') {
-                $user->provider = 'google';
-                $user->save();
-            }
+            // Store the verification code in the cache for a limited time (5 minutes)
+            Cache::put('verification_code_' . $validated['phone'], $verificationCode, 300); // 5 minutes expiration
 
+            // Send WhatsApp message with the verification code using Twilio
+            $twilioService->sendWhatsAppMessage($validated['phone'], "Your verification code is: $verificationCode");
 
-            auth()->login($user);
-
+            // Return a success response with user info
             return response()->json([
-                'message' => 'User registered successfully!',
+                'message' => 'User registered successfully. Please check WhatsApp for the verification code.',
                 'user' => $user,
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
-
+            // Return validation error messages
             return response()->json([
                 'message' => 'Validation failed',
                 'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
-
+            // Return general error message
             return response()->json([
                 'message' => 'Registration failed',
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function verifyPhone(Request $request)
+    {
+        $request->validate([
+            'verification_code' => 'required|numeric|digits:6',
+        ]);
+
+        $storedCode = $request->session()->get('verification_code');
+        $phone = $request->session()->get('phone');
+
+        if ($request->verification_code == $storedCode) {
+            $user = User::where('phone', $phone)->first();
+            if ($user) {
+                auth()->login($user);
+
+                return response()->json([
+                    'message' => 'Phone number verified successfully.',
+                    'user' => $user,
+                ], 200);
+            }
+
+            return response()->json([
+                'message' => 'User not found.',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Invalid verification code.',
+        ], 400);
     }
 
 
