@@ -30,7 +30,7 @@ Route::post('/store/product', [ProductController::class, 'upload'])->middleware(
 Route::get('/get/product/{id}', [ProductController::class, 'getProductById']);
 Route::get('/get/productExcel/{id}', [ProductController::class, 'getExcelUrl']);
 Route::get('/get-excel-data/{id}', [ProductController::class, 'getExcelData']);
-Route::get('/get/product/{id}/download-pdf', [ProductController::class, 'downloadProductAsPDF']);
+Route::post('/get/product/{productId}/download-pdf', [ProductController::class, 'downloadProductAsPDF']);
 
 
 

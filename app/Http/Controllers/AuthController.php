@@ -16,46 +16,38 @@ class AuthController extends Controller
     public function register(Request $request, TwilioServices $twilioService)
     {
         try {
-            // Validate the incoming request data
+            
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users,email',
                 'password' => $request->has('provider') && $request->provider === 'google' ? 'nullable' : 'required|string|min:8',
                 'provider' => 'nullable|in:google',
-                'phone' => 'required|unique:users|regex:/^\+?[1-9]\d{1,14}$/', // Validate phone number
+                'phone' => 'required|unique:users|regex:/^\+?[1-9]\d{1,14}$/', 
             ]);
-
-            // Create a new user record in the database
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => $validated['password'] ? Hash::make($validated['password']) : null,
                 'phone' => $validated['phone'],
-                'provider' => $request->provider ? $validated['provider'] : null,  // Handle provider field for Google
+                'provider' => $request->provider ? $validated['provider'] : null,  
             ]);
 
-            // Generate a 6-digit verification code
             $verificationCode = rand(100000, 999999);
 
-            // Store the verification code in the cache for a limited time (5 minutes)
             Cache::put('verification_code_' . $validated['phone'], $verificationCode, 300); // 5 minutes expiration
 
-            // Send WhatsApp message with the verification code using Twilio
             $twilioService->sendWhatsAppMessage($validated['phone'], "Your verification code is: $verificationCode");
 
-            // Return a success response with user info
             return response()->json([
                 'message' => 'User registered successfully. Please check WhatsApp for the verification code.',
                 'user' => $user,
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            // Return validation error messages
             return response()->json([
                 'message' => 'Validation failed',
                 'errors' => $e->errors(),
             ], 422);
         } catch (\Exception $e) {
-            // Return general error message
             return response()->json([
                 'message' => 'Registration failed',
                 'error' => $e->getMessage(),
